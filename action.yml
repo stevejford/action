@@ -1,0 +1,63 @@
+name: "ScreenshotsMCP Visual Diff"
+description: "Compare a baseline URL against a PR preview URL pixel-by-pixel using ScreenshotsMCP. Posts a PR comment with the diff overlay image and fails the check if pixel changes exceed the configured threshold."
+author: "ScreenshotsMCP"
+branding:
+  icon: "camera"
+  color: "green"
+
+inputs:
+  api-key:
+    description: "ScreenshotsMCP API key (sk_live_...). Use a repository secret."
+    required: true
+  baseline-url:
+    description: "URL captured as the baseline (typically the production / main branch deployment)."
+    required: true
+  preview-url:
+    description: "URL captured as the candidate (typically the PR preview deployment)."
+    required: true
+  width:
+    description: "Viewport width in pixels."
+    required: false
+    default: "1280"
+  height:
+    description: "Viewport height in pixels."
+    required: false
+    default: "800"
+  threshold:
+    description: "Pixel-color threshold passed to pixelmatch (0=exact, 1=lenient)."
+    required: false
+    default: "0.1"
+  fail-on-change-percent:
+    description: "Maximum allowed % of pixels that may change before this check fails. Set to 100 to always pass."
+    required: false
+    default: "1.0"
+  comment-on-pr:
+    description: "When 'true' (default), posts or updates a PR comment with the diff result."
+    required: false
+    default: "true"
+  github-token:
+    description: "GitHub token used to post the PR comment. Defaults to the action's GITHUB_TOKEN."
+    required: false
+    default: ${{ github.token }}
+  api-base:
+    description: "Override the ScreenshotsMCP API base URL."
+    required: false
+    default: "https://screenshotsmcp-api-production.up.railway.app"
+
+outputs:
+  diff-url:
+    description: "Public URL of the diff overlay image."
+  before-url:
+    description: "Public URL of the baseline capture."
+  after-url:
+    description: "Public URL of the preview capture."
+  changed-percent:
+    description: "Percentage of pixels that differ between baseline and preview."
+  match-score:
+    description: "100 minus changed-percent."
+  passed:
+    description: "'true' if changed-percent is at or below fail-on-change-percent."
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
